@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.126/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.126/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <script type="module">
+    // Your access token can be found at: https://ion.cesium.com/tokens.
+    // This is the default access token from your ion account
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYmE4MzBmZS0wN2ZkLTQzNmQtYmFlOS1mYzgyM2E1NGViMzkiLCJpZCI6Mjc4NTkxLCJpYXQiOjE3NDAzODAxOTZ9.sVborFjUrI_1lBH4Bi2xnUloj4N-jfNkY6y6enxSsas';
+
+    // Initialize the Cesium Viewer in the HTML element with the cesiumContainer ID.
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrain: Cesium.Terrain.fromWorldTerrain(),
+    });
+
+    // Fly the camera to a global view
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(0, 0, 20000000),
+    });
+
+    // Add Cesium OSM Buildings, a global 3D buildings layer.
+    const buildingTileset = await Cesium.createOsmBuildingsAsync();
+    viewer.scene.primitives.add(buildingTileset);
+
+    // Function to add country polygons
+    const addCountryPolygon = async (name, color, url) => {
+      const geoJson = await Cesium.GeoJsonDataSource.load(url);
+      geoJson.entities.values.forEach((entity) => {
+        entity.polygon.material = color;
+        entity.name = name;
+      });
+      viewer.dataSources.add(geoJson);
+    };
+
+    // Add country polygons for various countries and entities
+    const countries = [
+      { name: "Russia", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/RUS.geo.json' },
+      { name: "Ukraine", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/UKR.geo.json' },
+      { name: "Israel", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/ISR.geo.json' },
+      { name: "Palestine", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/PSE.geo.json' },
+      { name: "Hamas", url: '' },
+      { name: "Hezbollah", url: '' },
+      { name: "Yemen", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/YEM.geo.json' },
+      { name: "Syria", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/SYR.geo.json' },
+      { name: "Nagorno-Karabakh", url: '' }, // No specific GeoJSON file available
+      { name: "Somalia", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/SOM.geo.json' },
+      { name: "Central African Republic", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/CAF.geo.json' },
+      { name: "South Sudan", url: 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries/SSD.geo.json' }
+    ];
+
+    countries.forEach((country) => {
+      if (country.url) {
+        addCountryPolygon(country.name, Cesium.Color.RED.withAlpha(0.5), country.url);
+      }
+    });
+
+  </script>
+</div>
+</body>
+</html>
